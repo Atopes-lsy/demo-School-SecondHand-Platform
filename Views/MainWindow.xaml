@@ -1,0 +1,357 @@
+<Window x:Class="School二手Platform.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:School二手Platform.ViewModels"
+        xmlns:cv="clr-namespace:School二手Platform.Converters"
+        Title="校园二手交易平台" Height="700" Width="1100"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F6FA">
+
+    <Window.Resources>
+        <cv:BoolToVisibilityConverter x:Key="BoolToVis"/>
+        <cv:ProductConditionToTextConverter x:Key="ConditionToText"/>
+        <cv:PriceStrategyToTextConverter x:Key="StrategyToText"/>
+        <cv:ConditionToBadgeColorConverter x:Key="ConditionColor"/>
+        <cv:StrategyToBadgeColorConverter x:Key="StrategyColor"/>
+        <cv:PriceToStringConverter x:Key="PriceToString"/>
+        <cv:CategoryToGradientConverter x:Key="CategoryGradient"/>
+        <cv:BoolToFavoriteIconConverter x:Key="FavoriteIcon"/>
+
+        <!-- Capsule pill badge style -->
+        <Style x:Key="CapsuleBadge" TargetType="Border">
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="6,3"/>
+            <Setter Property="Margin" Value="0,0,4,0"/>
+            <Setter Property="Background" Value="#CC000000"/>
+        </Style>
+
+        <Style x:Key="CapsuleBadgeText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <Style x:Key="FilterButton" TargetType="RadioButton">
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="border" Background="Transparent"
+                                CornerRadius="6" Padding="10,6"
+                                Cursor="Hand">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3498DB"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Top Bar -->
+        <Border Grid.Row="0" Background="#376c78">
+            <Grid Margin="20,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="🎓 校园二手" FontSize="22" FontWeight="Bold"
+                               Foreground="White" VerticalAlignment="Center"/>
+                    <TextBlock Text="直面交易平台" FontSize="14"
+                               Foreground="#BDC3C7" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Border Background="#3498DB" CornerRadius="8" Padding="2">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBox x:Name="SearchBox" Width="280" Height="32"
+                                     FontSize="14" BorderThickness="0"
+                                     Background="White" VerticalContentAlignment="Center"
+                                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     Padding="10,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Button Content="🔍 搜索" Width="80" Height="32" Margin="10,0,0,0"
+                            Command="{Binding SearchCommand}"
+                            Background="#a0c96d" Foreground="White" BorderThickness="0"
+                            FontSize="13" Cursor="Hand" FontWeight="SemiBold">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="#a0c96d" CornerRadius="6" Cursor="Hand">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                    <Button Content="＋ 发布闲置" Width="110" Height="32" Margin="15,0,0,0"
+                            Command="{Binding PublishNewProductCommand}"
+                            Foreground="White" BorderThickness="0"
+                            FontSize="13" Cursor="Hand" FontWeight="SemiBold">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border Background="#e79b42" CornerRadius="6" Cursor="Hand">
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Sidebar -->
+            <Border Grid.Column="0" Background="White" Margin="0,0,2,0">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="15,20">
+                        <!-- Favorite Filter -->
+                        <Button Margin="0,0,0,15" Height="40"
+                                Command="{Binding FavoriteFilterCommand}"
+                                FontSize="14" FontWeight="SemiBold" Cursor="Hand">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="favBorder" CornerRadius="8" Cursor="Hand"
+                                            Padding="12,8">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock x:Name="favIcon" Text="♥" FontSize="16"
+                                                       Foreground="#E74C3C" VerticalAlignment="Center"/>
+                                            <TextBlock x:Name="favText" Text=" 我的收藏" FontSize="14"
+                                                       Foreground="#E74C3C" VerticalAlignment="Center"
+                                                       FontWeight="SemiBold" Margin="4,0,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding ShowFavoritesOnly}" Value="True">
+                                            <Setter TargetName="favBorder" Property="Background" Value="#E74C3C"/>
+                                            <Setter TargetName="favIcon" Property="Foreground" Value="White"/>
+                                            <Setter TargetName="favText" Property="Foreground" Value="White"/>
+                                        </DataTrigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+
+                        <Separator Margin="0,0,0,15" Background="#ECF0F1"/>
+
+                        <!-- Category Filter -->
+                        <TextBlock Text="📂 商品分类" FontSize="15" FontWeight="Bold"
+                                   Foreground="#2C3E50" Margin="0,0,0,10"/>
+                        <ListBox ItemsSource="{Binding Categories}"
+                                 SelectedItem="{Binding SelectedCategory}"
+                                 BorderThickness="0" Background="Transparent">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}" FontSize="13"
+                                               Padding="8,6" Margin="0,2"
+                                               Foreground="#2C3E50"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="ListBoxItem">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ListBoxItem">
+                                                <Border x:Name="Bd" Background="Transparent"
+                                                        CornerRadius="6" Padding="4,2" Cursor="Hand">
+                                                    <ContentPresenter/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter TargetName="Bd" Property="Background" Value="#3498DB"/>
+                                                        <Setter Property="Foreground" Value="White"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                        </ListBox>
+
+                        <Separator Margin="0,15" Background="#ECF0F1"/>
+
+                        <!-- Condition Filter -->
+                        <TextBlock Text="🏷️ 新旧/余量" FontSize="15" FontWeight="Bold"
+                                   Foreground="#2C3E50" Margin="0,0,0,10"/>
+                        <ComboBox ItemsSource="{Binding ConditionOptions}"
+                                  SelectedItem="{Binding SelectedCondition}"
+                                  FontSize="13" Padding="5" Height="32">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource ConditionToText}}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <Separator Margin="0,15" Background="#ECF0F1"/>
+
+                        <!-- Strategy Filter -->
+                        <TextBlock Text="💰 价格机制" FontSize="15" FontWeight="Bold"
+                                   Foreground="#2C3E50" Margin="0,0,0,10"/>
+                        <ComboBox ItemsSource="{Binding StrategyOptions}"
+                                  SelectedItem="{Binding SelectedStrategy}"
+                                  FontSize="13" Padding="5" Height="32">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource StrategyToText}}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+
+                        <Separator Margin="0,15" Background="#ECF0F1"/>
+
+                        <Button Content="🔄 重置筛选" Height="34"
+                                Command="{Binding ResetFiltersCommand}"
+                                FontSize="13" Cursor="Hand">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="#95A5A6" CornerRadius="6" Cursor="Hand">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Button.Template>
+                        </Button>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Product List -->
+            <Border Grid.Column="1" Background="#F5F6FA">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <WrapPanel x:Name="ProductsPanel" Margin="15,20">
+                        <ItemsControl ItemsSource="{Binding FilteredProducts}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <!-- Modern Product Card -->
+                                    <Border Width="280" Height="270" Margin="6"
+                                            CornerRadius="12" Background="White" Cursor="Hand"
+                                            MouseLeftButtonDown="ProductCard_Click" Tag="{Binding}">
+                                        <Border.Effect>
+                                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Opacity="0.08"/>
+                                        </Border.Effect>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="130"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
+
+                                            <!-- Image Placeholder with Gradient -->
+                                            <Border Grid.Row="0"
+                                                    Background="{Binding Category, Converter={StaticResource CategoryGradient}}"
+                                                    CornerRadius="12,12,0,0">
+                                                <Grid>
+                                                    <!-- Category icon in center -->
+                                                    <TextBlock Text="{Binding Category}" FontSize="14"
+                                                               Foreground="#AAFFFFFF"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"
+                                                               FontWeight="SemiBold"/>
+
+                                                    <!-- Capsule Badges floating top-right -->
+                                                    <StackPanel Orientation="Horizontal"
+                                                                HorizontalAlignment="Right"
+                                                                VerticalAlignment="Top"
+                                                                Margin="0,8,8,0">
+                                                        <Border Style="{StaticResource CapsuleBadge}"
+                                                                Background="{Binding Condition, Converter={StaticResource ConditionColor}}">
+                                                            <TextBlock Style="{StaticResource CapsuleBadgeText}"
+                                                                       Text="{Binding Condition, Converter={StaticResource ConditionToText}}"/>
+                                                        </Border>
+                                                        <Border Style="{StaticResource CapsuleBadge}"
+                                                                Background="{Binding Strategy, Converter={StaticResource StrategyColor}}">
+                                                            <TextBlock Style="{StaticResource CapsuleBadgeText}"
+                                                                       Text="{Binding Strategy, Converter={StaticResource StrategyToText}}"/>
+                                                        </Border>
+                                                    </StackPanel>
+
+                                                    <!-- Favorite Heart Toggle -->
+                                                    <Button Width="30" Height="30"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Bottom"
+                                                            Margin="0,0,8,8"
+                                                            Tag="{Binding}"
+                                                            Click="FavoriteToggle_Click"
+                                                            Cursor="Hand">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="#CCFFFFFF"
+                                                                        CornerRadius="15">
+                                                                    <TextBlock x:Name="favIcon"
+                                                                               Text="♡"
+                                                                               FontSize="16"
+                                                                               Foreground="#E74C3C"
+                                                                               HorizontalAlignment="Center"
+                                                                               VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
+                                                    </Button>
+                                                </Grid>
+                                            </Border>
+
+                                            <!-- Card Info Section -->
+                                            <StackPanel Grid.Row="1" Margin="12,10">
+                                                <!-- Title (2 lines max) -->
+                                                <TextBlock Text="{Binding Title}"
+                                                           FontSize="14" FontWeight="Bold"
+                                                           Foreground="#2C3E50"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           MaxHeight="42"
+                                                           TextWrapping="Wrap"
+                                                           LineStackingStrategy="BlockLineHeight"
+                                                           LineHeight="20"/>
+
+                                                <!-- Category · Time -->
+                                                <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                    <TextBlock Text="{Binding Category}"
+                                                               FontSize="12" Foreground="#95A5A6"/>
+                                                    <TextBlock Text=" · " FontSize="12" Foreground="#BDC3C7"/>
+                                                    <TextBlock Text="{Binding CreatedTime, StringFormat='MM-dd HH:mm'}"
+                                                               FontSize="12" Foreground="#95A5A6"/>
+                                                </StackPanel>
+
+                                                <!-- Description (1 line) -->
+                                                <TextBlock Text="{Binding Description}"
+                                                           FontSize="12" Foreground="#7F8C8D"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           Margin="0,2,0,0"/>
+
+                                                <!-- Price -->
+                                                <TextBlock HorizontalAlignment="Right"
+                                                           Text="{Binding Price, Converter={StaticResource PriceToString}}"
+                                                           FontSize="20" FontWeight="Bold"
+                                                           Foreground="#E74C3C"
+                                                           Margin="0,4,0,0"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </WrapPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

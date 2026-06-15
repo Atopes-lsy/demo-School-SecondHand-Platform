@@ -1,0 +1,12 @@
+<Application x:Class="School二手Platform.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="Views/MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <Style TargetType="Window">
+                <Setter Property="FontFamily" Value="Microsoft YaHei"/>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
